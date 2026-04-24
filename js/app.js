@@ -261,7 +261,6 @@ function fmtDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
-// ====== 初始自动排盘（演示用）======
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("form-single").dispatchEvent(new Event("submit"));
-});
+// ====== 初始自动排盘（页面加载完立即执行一次）======
+// 脚本在 body 末尾加载，此时 DOM 已就绪，直接触发即可
+document.getElementById("form-single").dispatchEvent(new Event("submit"));
