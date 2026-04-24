@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>印占 · Vedic Astrology</title>
+<meta name="description" content="印度占星排盘工具 · 月亮星座 · 星宿 · 大运 · 合盘">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 顶部 -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">✦</span>
+    <span class="brand-name">VEDIC</span>
+    <span class="brand-sub">印占排盘</span>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="single">本命盘</button>
+    <button class="tab" data-tab="dasha">大运</button>
+    <button class="tab" data-tab="synastry">合盘</button>
+    <button class="tab" data-tab="about">关于</button>
+  </nav>
+</header>
+
+<main class="main">
+
+  <!-- 本命盘 -->
+  <section class="panel active" id="panel-single">
+    <div class="grid">
+      <!-- 输入 -->
+      <aside class="card card-input">
+        <h2 class="card-title">出生信息</h2>
+        <form id="form-single" class="form">
+          <label>姓名（可选）
+            <input type="text" id="s-name" placeholder="飞总">
+          </label>
+          <label>出生日期
+            <input type="date" id="s-date" required value="1990-01-01">
+          </label>
+          <label>出生时间
+            <input type="time" id="s-time" required value="12:00">
+          </label>
+          <div class="row">
+            <label>纬度
+              <input type="number" step="0.0001" id="s-lat" required value="31.2304">
+            </label>
+            <label>经度
+              <input type="number" step="0.0001" id="s-lon" required value="121.4737">
+            </label>
+          </div>
+          <label>时区（小时）
+            <input type="number" step="0.5" id="s-tz" required value="8">
+          </label>
+          <label>常用城市
+            <select id="s-city">
+              <option value="">手动输入</option>
+              <option value="31.2304,121.4737,8">上海</option>
+              <option value="39.9042,116.4074,8">北京</option>
+              <option value="23.1291,113.2644,8">广州</option>
+              <option value="22.5431,114.0579,8">深圳</option>
+              <option value="30.5728,104.0668,8">成都</option>
+              <option value="30.2741,120.1551,8">杭州</option>
+              <option value="34.3416,108.9398,8">西安</option>
+              <option value="22.3193,114.1694,8">香港</option>
+              <option value="25.0330,121.5654,8">台北</option>
+              <option value="35.6762,139.6503,9">东京</option>
+              <option value="40.7128,-74.0060,-5">纽约</option>
+              <option value="51.5074,-0.1278,0">伦敦</option>
+            </select>
+          </label>
+          <button type="submit" class="btn-primary">排盘</button>
+        </form>
+      </aside>
+
+      <!-- 星盘图 -->
+      <div class="card card-chart">
+        <h2 class="card-title">北印度星盘 <span class="muted" id="chart-name"></span></h2>
+        <canvas id="chart-canvas" width="560" height="560"></canvas>
+      </div>
+
+      <!-- 核心信息 -->
+      <div class="card card-summary">
+        <h2 class="card-title">核心盘象</h2>
+        <div class="summary-grid" id="summary-grid">
+          <div class="summary-item"><span class="label">上升（Lagna）</span><span class="value" id="sum-asc">—</span></div>
+          <div class="summary-item"><span class="label">月亮（Rashi）</span><span class="value" id="sum-moon">—</span></div>
+          <div class="summary-item"><span class="label">太阳</span><span class="value" id="sum-sun">—</span></div>
+          <div class="summary-item"><span class="label">月亮星宿</span><span class="value" id="sum-nak">—</span></div>
+          <div class="summary-item"><span class="label">命主星</span><span class="value" id="sum-lord">—</span></div>
+          <div class="summary-item"><span class="label">星宿主</span><span class="value" id="sum-naklord">—</span></div>
+        </div>
+      </div>
+
+      <!-- 行星列表 -->
+      <div class="card card-planets">
+        <h2 class="card-title">九曜位置</h2>
+        <table class="tbl">
+          <thead><tr><th>行星</th><th>星座</th><th>度数</th><th>宫位</th><th>星宿</th><th>宿主</th></tr></thead>
+          <tbody id="planet-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 大运 -->
+  <section class="panel" id="panel-dasha">
+    <div class="card card-wide">
+      <h2 class="card-title">Vimshottari Dasha 大运 <span class="muted">（基于本命盘月亮星宿）</span></h2>
+      <p class="hint">请先在「本命盘」排盘。总周期 120 年，按月亮所在星宿起运。</p>
+      <div class="dasha-wrap">
+        <div class="dasha-col">
+          <h3>主运（Mahadasha）</h3>
+          <table class="tbl"><thead><tr><th>行星</th><th>开始</th><th>结束</th><th>年数</th></tr></thead><tbody id="dasha-maha"></tbody></table>
+        </div>
+        <div class="dasha-col">
+          <h3>当前子运（Antardasha）</h3>
+          <table class="tbl"><thead><tr><th>子运</th><th>开始</th><th>结束</th></tr></thead><tbody id="dasha-antar"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 合盘 -->
+  <section class="panel" id="panel-synastry">
+    <div class="grid2">
+      <aside class="card">
+        <h2 class="card-title">合盘 · 两人信息</h2>
+        <form id="form-synastry" class="form">
+          <fieldset class="person">
+            <legend>甲方</legend>
+            <label>姓名 <input type="text" id="a-name" value="TA"></label>
+            <label>日期 <input type="date" id="a-date" required value="1990-01-01"></label>
+            <label>时间 <input type="time" id="a-time" required value="12:00"></label>
+            <div class="row">
+              <label>纬度 <input type="number" step="0.0001" id="a-lat" required value="31.2304"></label>
+              <label>经度 <input type="number" step="0.0001" id="a-lon" required value="121.4737"></label>
+            </div>
+            <label>时区 <input type="number" step="0.5" id="a-tz" required value="8"></label>
+          </fieldset>
+          <fieldset class="person">
+            <legend>乙方</legend>
+            <label>姓名 <input type="text" id="b-name" value="我"></label>
+            <label>日期 <input type="date" id="b-date" required value="1992-06-15"></label>
+            <label>时间 <input type="time" id="b-time" required value="10:30"></label>
+            <div class="row">
+              <label>纬度 <input type="number" step="0.0001" id="b-lat" required value="31.2304"></label>
+              <label>经度 <input type="number" step="0.0001" id="b-lon" required value="121.4737"></label>
+            </div>
+            <label>时区 <input type="number" step="0.5" id="b-tz" required value="8"></label>
+          </fieldset>
+          <button type="submit" class="btn-primary">合盘分析</button>
+        </form>
+      </aside>
+
+      <div class="card">
+        <h2 class="card-title">合盘结果</h2>
+        <div id="synastry-result" class="syn-result">
+          <p class="hint">填入两人信息并点击「合盘分析」。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 关于 -->
+  <section class="panel" id="panel-about">
+    <div class="card card-wide">
+      <h2 class="card-title">关于印占</h2>
+      <div class="about-text">
+        <p><strong>Vedic Astrology（Jyotish / 印度占星）</strong> 起源于古印度吠陀典籍，与西方占星的关键区别：</p>
+        <ul>
+          <li><strong>恒星黄道</strong>：使用真实星空位置（Sidereal），而非西占的回归黄道（Tropical），两者目前相差约 24°</li>
+          <li><strong>27 星宿（Nakshatra）</strong>：比 12 星座更细致，是印占的灵魂</li>
+          <li><strong>以月亮为核心</strong>：西占看太阳星座，印占以月亮所在星座（Rashi）为主</li>
+          <li><strong>Vimshottari 大运</strong>：120 年周期的人生阶段推演</li>
+        </ul>
+        <h3>本工具说明</h3>
+        <p>本工具采用 <strong>Lahiri Ayanamsa</strong>（印度官方标准）+ <strong>Whole Sign</strong>（整宫制），计算精度约 ±1°，适用于学习和参考。严肃命理分析建议使用 Jagannatha Hora 等专业软件。</p>
+        <p class="muted">© 2026 飞总 · 仅供文化学习与兴趣参考</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 脚本：顺序加载 -->
+<script src="js/data.js"></script>
+<script src="js/astronomy.js"></script>
+<script src="js/vedic.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
