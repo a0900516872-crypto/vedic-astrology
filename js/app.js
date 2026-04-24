@@ -116,21 +116,50 @@ bindCityAutocomplete("s", true);
 bindCityAutocomplete("a", false);
 bindCityAutocomplete("b", false);
 
+// ====== 时间区间开关 ======
+document.getElementById("s-time-range").addEventListener("change", (e) => {
+  document.getElementById("s-time-range-wrap").classList.toggle("hidden", !e.target.checked);
+});
+
 // ====== 本命盘表单 ======
 document.getElementById("form-single").addEventListener("submit", (e) => {
   e.preventDefault();
   const date = document.getElementById("s-date").value;
-  const time = document.getElementById("s-time").value;
   const lat = parseFloat(document.getElementById("s-lat").value);
   const lon = parseFloat(document.getElementById("s-lon").value);
   const tz = parseFloat(document.getElementById("s-tz").value);
   const name = document.getElementById("s-name").value || "";
+  const useRange = document.getElementById("s-time-range").checked;
 
   const [y, m, d] = date.split("-").map(Number);
-  const [hh, mm] = time.split(":").map(Number);
+
+  let hh, mm, rangeInfo = null;
+  if (useRange) {
+    const t1 = document.getElementById("s-time-start").value.split(":").map(Number);
+    const t2 = document.getElementById("s-time-end").value.split(":").map(Number);
+    const min1 = t1[0] * 60 + t1[1];
+    const min2 = t2[0] * 60 + t2[1];
+    const mid = Math.floor((min1 + min2) / 2);
+    hh = Math.floor(mid / 60);
+    mm = mid % 60;
+    // 同时排两盘检查上升是否会变
+    const chartStart = castChart(y, m, d, t1[0], t1[1], lat, lon, tz);
+    const chartEnd = castChart(y, m, d, t2[0], t2[1], lat, lon, tz);
+    rangeInfo = {
+      startTime: `${String(t1[0]).padStart(2,"0")}:${String(t1[1]).padStart(2,"0")}`,
+      endTime: `${String(t2[0]).padStart(2,"0")}:${String(t2[1]).padStart(2,"0")}`,
+      ascChanges: chartStart.ascRashi !== chartEnd.ascRashi,
+      ascStart: chartStart.ascRashi,
+      ascEnd: chartEnd.ascRashi,
+      spanMin: min2 - min1
+    };
+  } else {
+    const time = document.getElementById("s-time").value;
+    [hh, mm] = time.split(":").map(Number);
+  }
 
   const chart = castChart(y, m, d, hh, mm, lat, lon, tz);
-  currentChart = { chart, birthDate: new Date(y, m - 1, d, hh, mm), name };
+  currentChart = { chart, birthDate: new Date(y, m - 1, d, hh, mm), name, rangeInfo };
 
   renderSingle(currentChart);
 });
@@ -159,9 +188,28 @@ function readPerson(prefix) {
 }
 
 // ====== 渲染：本命盘 ======
-function renderSingle({ chart, birthDate, name }) {
+function renderSingle({ chart, birthDate, name, rangeInfo }) {
   // 顶部标题
   document.getElementById("chart-name").textContent = name ? "· " + name : "";
+
+  // 区间警告
+  const warnBox = document.getElementById("asc-warning-box");
+  if (rangeInfo) {
+    if (rangeInfo.ascChanges) {
+      const a1 = RASHIS[rangeInfo.ascStart];
+      const a2 = RASHIS[rangeInfo.ascEnd];
+      warnBox.innerHTML = `<div class="asc-warning">
+        ⚠ 上升星座在此区间内会变化（${rangeInfo.startTime}~${rangeInfo.endTime}，跨度 ${rangeInfo.spanMin} 分钟）：
+        <strong>${a1.zh} → ${a2.zh}</strong>。当前使用中间点 ${a1.zh === a2.zh ? "" : "参考"}排盘，建议核实准确出生时间。
+      </div>`;
+    } else {
+      warnBox.innerHTML = `<div class="asc-warning" style="border-left-color: var(--success); background: #5d9b6b1a; color: #8fc99a;">
+        ✓ 此区间（${rangeInfo.startTime}~${rangeInfo.endTime}，${rangeInfo.spanMin} 分钟）内上升星座不变，结果可信。
+      </div>`;
+    }
+  } else {
+    warnBox.innerHTML = "";
+  }
 
   // 星盘图
   drawNorthIndianChart(document.getElementById("chart-canvas"), chart);

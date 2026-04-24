@@ -41,7 +41,17 @@
           </label>
           <label>出生时间
             <input type="time" id="s-time" required value="12:00">
+            <label class="inline-toggle">
+              <input type="checkbox" id="s-time-range"> 时间不确定？设置区间
+            </label>
           </label>
+          <div class="time-range-wrap hidden" id="s-time-range-wrap">
+            <div class="row">
+              <label>最早 <input type="time" id="s-time-start" value="10:00"></label>
+              <label>最晚 <input type="time" id="s-time-end" value="14:00"></label>
+            </div>
+            <small class="range-hint" id="s-range-hint">将使用区间中间点排盘，并标注上升星座敏感度</small>
+          </div>
           <label class="city-field">出生城市
             <input type="text" id="s-city" placeholder="输入城市名，如：深圳、上海、东京" autocomplete="off" value="上海" required>
             <div class="city-suggest" id="s-city-suggest"></div>
@@ -82,6 +92,7 @@
           <div class="summary-item"><span class="label">命主星</span><span class="value" id="sum-lord">—</span></div>
           <div class="summary-item"><span class="label">星宿主</span><span class="value" id="sum-naklord">—</span></div>
         </div>
+        <div id="asc-warning-box"></div>
       </div>
 
       <!-- 行星列表 -->
