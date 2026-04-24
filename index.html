@@ -39,38 +39,21 @@
           <label>出生日期
             <input type="date" id="s-date" required value="1990-01-01">
           </label>
-          <label>出生时间
-            <input type="time" id="s-time" required value="12:00">
-            <label class="inline-toggle">
-              <input type="checkbox" id="s-time-range"> 时间不确定？设置区间
-            </label>
-          </label>
-          <div class="time-range-wrap hidden" id="s-time-range-wrap">
+          <label>出生时间区间
             <div class="row">
-              <label>最早 <input type="time" id="s-time-start" value="10:00"></label>
-              <label>最晚 <input type="time" id="s-time-end" value="14:00"></label>
+              <input type="time" id="s-time-start" required value="11:30" aria-label="最早时间">
+              <input type="time" id="s-time-end" required value="12:30" aria-label="最晚时间">
             </div>
-            <small class="range-hint" id="s-range-hint">将使用区间中间点排盘，并标注上升星座敏感度</small>
-          </div>
+            <small class="range-hint">不确定时可放宽区间，系统会用中点排盘并提示上升星座是否敏感</small>
+          </label>
           <label class="city-field">出生城市
             <input type="text" id="s-city" placeholder="输入城市名，如：深圳、上海、东京" autocomplete="off" value="上海" required>
             <div class="city-suggest" id="s-city-suggest"></div>
             <small class="city-meta" id="s-city-meta">上海 · 31.23°N, 121.47°E · UTC+8</small>
           </label>
-          <details class="advanced">
-            <summary>手动校准经纬度（可选）</summary>
-            <div class="row">
-              <label>纬度
-                <input type="number" step="0.0001" id="s-lat" value="31.2304">
-              </label>
-              <label>经度
-                <input type="number" step="0.0001" id="s-lon" value="121.4737">
-              </label>
-            </div>
-            <label>时区（小时）
-              <input type="number" step="0.5" id="s-tz" value="8">
-            </label>
-          </details>
+          <input type="hidden" id="s-lat" value="31.2304">
+          <input type="hidden" id="s-lon" value="121.4737">
+          <input type="hidden" id="s-tz" value="8">
           <button type="submit" class="btn-primary">排盘</button>
         </form>
       </aside>

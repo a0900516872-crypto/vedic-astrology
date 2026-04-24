@@ -102,61 +102,47 @@ function bindCityAutocomplete(prefix, showCoord = false) {
     }
   });
 
-  // 手动修改高级经纬度时，清空 meta 提示
-  [latEl, lonEl, tzEl].forEach(el => {
-    if (el && el.type !== "hidden") {
-      el.addEventListener("input", () => {
-        meta.textContent = `自定义 · ${latEl.value}°, ${lonEl.value}° · UTC${tzEl.value}`;
-      });
-    }
-  });
 }
 
 bindCityAutocomplete("s", true);
 bindCityAutocomplete("a", false);
 bindCityAutocomplete("b", false);
 
-// ====== 时间区间开关 ======
-document.getElementById("s-time-range").addEventListener("change", (e) => {
-  document.getElementById("s-time-range-wrap").classList.toggle("hidden", !e.target.checked);
-});
-
 // ====== 本命盘表单 ======
 document.getElementById("form-single").addEventListener("submit", (e) => {
   e.preventDefault();
+
+  // 提交前强制根据城市名刷新一次经纬度（防止用户输完没失焦就点按钮）
+  syncCityToCoord("s");
+
   const date = document.getElementById("s-date").value;
   const lat = parseFloat(document.getElementById("s-lat").value);
   const lon = parseFloat(document.getElementById("s-lon").value);
   const tz = parseFloat(document.getElementById("s-tz").value);
   const name = document.getElementById("s-name").value || "";
-  const useRange = document.getElementById("s-time-range").checked;
 
   const [y, m, d] = date.split("-").map(Number);
 
-  let hh, mm, rangeInfo = null;
-  if (useRange) {
-    const t1 = document.getElementById("s-time-start").value.split(":").map(Number);
-    const t2 = document.getElementById("s-time-end").value.split(":").map(Number);
-    const min1 = t1[0] * 60 + t1[1];
-    const min2 = t2[0] * 60 + t2[1];
-    const mid = Math.floor((min1 + min2) / 2);
-    hh = Math.floor(mid / 60);
-    mm = mid % 60;
-    // 同时排两盘检查上升是否会变
-    const chartStart = castChart(y, m, d, t1[0], t1[1], lat, lon, tz);
-    const chartEnd = castChart(y, m, d, t2[0], t2[1], lat, lon, tz);
-    rangeInfo = {
-      startTime: `${String(t1[0]).padStart(2,"0")}:${String(t1[1]).padStart(2,"0")}`,
-      endTime: `${String(t2[0]).padStart(2,"0")}:${String(t2[1]).padStart(2,"0")}`,
-      ascChanges: chartStart.ascRashi !== chartEnd.ascRashi,
-      ascStart: chartStart.ascRashi,
-      ascEnd: chartEnd.ascRashi,
-      spanMin: min2 - min1
-    };
-  } else {
-    const time = document.getElementById("s-time").value;
-    [hh, mm] = time.split(":").map(Number);
-  }
+  // 时间区间：取中点排盘 + 检查上升是否敏感
+  const t1 = document.getElementById("s-time-start").value.split(":").map(Number);
+  const t2 = document.getElementById("s-time-end").value.split(":").map(Number);
+  const min1 = t1[0] * 60 + t1[1];
+  const min2 = t2[0] * 60 + t2[1];
+  const mid = Math.floor((min1 + min2) / 2);
+  const hh = Math.floor(mid / 60);
+  const mm = mid % 60;
+
+  const chartStart = castChart(y, m, d, t1[0], t1[1], lat, lon, tz);
+  const chartEnd = castChart(y, m, d, t2[0], t2[1], lat, lon, tz);
+  const spanMin = min2 - min1;
+  const rangeInfo = spanMin > 0 ? {
+    startTime: `${String(t1[0]).padStart(2,"0")}:${String(t1[1]).padStart(2,"0")}`,
+    endTime: `${String(t2[0]).padStart(2,"0")}:${String(t2[1]).padStart(2,"0")}`,
+    ascChanges: chartStart.ascRashi !== chartEnd.ascRashi,
+    ascStart: chartStart.ascRashi,
+    ascEnd: chartEnd.ascRashi,
+    spanMin
+  } : null;
 
   const chart = castChart(y, m, d, hh, mm, lat, lon, tz);
   currentChart = { chart, birthDate: new Date(y, m - 1, d, hh, mm), name, rangeInfo };
@@ -164,9 +150,30 @@ document.getElementById("form-single").addEventListener("submit", (e) => {
   renderSingle(currentChart);
 });
 
+// 根据城市输入框的值，强制写入经纬度/时区/meta
+function syncCityToCoord(prefix) {
+  const input = document.getElementById(prefix + "-city");
+  if (!input) return;
+  const c = findCity(input.value);
+  if (!c) return;
+  document.getElementById(prefix + "-lat").value = c[1];
+  document.getElementById(prefix + "-lon").value = c[2];
+  document.getElementById(prefix + "-tz").value = c[3];
+  input.value = c[0];
+  const meta = document.getElementById(prefix + "-city-meta");
+  if (meta) {
+    const tzStr = (c[3] >= 0 ? "+" : "") + c[3];
+    meta.textContent = prefix === "s"
+      ? `${c[0]} · ${c[1].toFixed(2)}°${c[1]>=0?"N":"S"}, ${Math.abs(c[2]).toFixed(2)}°${c[2]>=0?"E":"W"} · UTC${tzStr}`
+      : `${c[0]} · UTC${tzStr}`;
+  }
+}
+
 // ====== 合盘表单 ======
 document.getElementById("form-synastry").addEventListener("submit", (e) => {
   e.preventDefault();
+  syncCityToCoord("a");
+  syncCityToCoord("b");
   const A = readPerson("a");
   const B = readPerson("b");
   const chartA = castChart(A.y, A.m, A.d, A.hh, A.mm, A.lat, A.lon, A.tz);
