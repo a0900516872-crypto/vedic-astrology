@@ -17,10 +17,10 @@
     <span class="brand-sub">印占排盘</span>
   </div>
   <nav class="tabs">
-    <button class="tab active" data-tab="single">本命盘</button>
-    <button class="tab" data-tab="dasha">大运</button>
-    <button class="tab" data-tab="synastry">合盘</button>
-    <button class="tab" data-tab="about">关于</button>
+    <button type="button" class="tab active" data-tab="single">本命盘</button>
+    <button type="button" class="tab" data-tab="dasha">大运</button>
+    <button type="button" class="tab" data-tab="synastry">合盘</button>
+    <button type="button" class="tab" data-tab="about">关于</button>
   </nav>
 </header>
 
@@ -42,34 +42,25 @@
           <label>出生时间
             <input type="time" id="s-time" required value="12:00">
           </label>
-          <div class="row">
-            <label>纬度
-              <input type="number" step="0.0001" id="s-lat" required value="31.2304">
-            </label>
-            <label>经度
-              <input type="number" step="0.0001" id="s-lon" required value="121.4737">
-            </label>
-          </div>
-          <label>时区（小时）
-            <input type="number" step="0.5" id="s-tz" required value="8">
+          <label class="city-field">出生城市
+            <input type="text" id="s-city" placeholder="输入城市名，如：深圳、上海、东京" autocomplete="off" value="上海" required>
+            <div class="city-suggest" id="s-city-suggest"></div>
+            <small class="city-meta" id="s-city-meta">上海 · 31.23°N, 121.47°E · UTC+8</small>
           </label>
-          <label>常用城市
-            <select id="s-city">
-              <option value="">手动输入</option>
-              <option value="31.2304,121.4737,8">上海</option>
-              <option value="39.9042,116.4074,8">北京</option>
-              <option value="23.1291,113.2644,8">广州</option>
-              <option value="22.5431,114.0579,8">深圳</option>
-              <option value="30.5728,104.0668,8">成都</option>
-              <option value="30.2741,120.1551,8">杭州</option>
-              <option value="34.3416,108.9398,8">西安</option>
-              <option value="22.3193,114.1694,8">香港</option>
-              <option value="25.0330,121.5654,8">台北</option>
-              <option value="35.6762,139.6503,9">东京</option>
-              <option value="40.7128,-74.0060,-5">纽约</option>
-              <option value="51.5074,-0.1278,0">伦敦</option>
-            </select>
-          </label>
+          <details class="advanced">
+            <summary>手动校准经纬度（可选）</summary>
+            <div class="row">
+              <label>纬度
+                <input type="number" step="0.0001" id="s-lat" value="31.2304">
+              </label>
+              <label>经度
+                <input type="number" step="0.0001" id="s-lon" value="121.4737">
+              </label>
+            </div>
+            <label>时区（小时）
+              <input type="number" step="0.5" id="s-tz" value="8">
+            </label>
+          </details>
           <button type="submit" class="btn-primary">排盘</button>
         </form>
       </aside>
@@ -133,22 +124,28 @@
             <label>姓名 <input type="text" id="a-name" value="TA"></label>
             <label>日期 <input type="date" id="a-date" required value="1990-01-01"></label>
             <label>时间 <input type="time" id="a-time" required value="12:00"></label>
-            <div class="row">
-              <label>纬度 <input type="number" step="0.0001" id="a-lat" required value="31.2304"></label>
-              <label>经度 <input type="number" step="0.0001" id="a-lon" required value="121.4737"></label>
-            </div>
-            <label>时区 <input type="number" step="0.5" id="a-tz" required value="8"></label>
+            <label class="city-field">出生城市
+              <input type="text" id="a-city" placeholder="输入城市名" autocomplete="off" value="上海" required>
+              <div class="city-suggest" id="a-city-suggest"></div>
+              <small class="city-meta" id="a-city-meta">上海 · UTC+8</small>
+            </label>
+            <input type="hidden" id="a-lat" value="31.2304">
+            <input type="hidden" id="a-lon" value="121.4737">
+            <input type="hidden" id="a-tz" value="8">
           </fieldset>
           <fieldset class="person">
             <legend>乙方</legend>
             <label>姓名 <input type="text" id="b-name" value="我"></label>
             <label>日期 <input type="date" id="b-date" required value="1992-06-15"></label>
             <label>时间 <input type="time" id="b-time" required value="10:30"></label>
-            <div class="row">
-              <label>纬度 <input type="number" step="0.0001" id="b-lat" required value="31.2304"></label>
-              <label>经度 <input type="number" step="0.0001" id="b-lon" required value="121.4737"></label>
-            </div>
-            <label>时区 <input type="number" step="0.5" id="b-tz" required value="8"></label>
+            <label class="city-field">出生城市
+              <input type="text" id="b-city" placeholder="输入城市名" autocomplete="off" value="深圳" required>
+              <div class="city-suggest" id="b-city-suggest"></div>
+              <small class="city-meta" id="b-city-meta">深圳 · UTC+8</small>
+            </label>
+            <input type="hidden" id="b-lat" value="22.5431">
+            <input type="hidden" id="b-lon" value="114.0579">
+            <input type="hidden" id="b-tz" value="8">
           </fieldset>
           <button type="submit" class="btn-primary">合盘分析</button>
         </form>

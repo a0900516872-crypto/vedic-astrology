@@ -39,6 +39,7 @@ body {
 .topbar {
   height: 64px;
   background: rgba(11,13,16,0.85);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -178,6 +179,86 @@ body {
   background: var(--bg-hover);
 }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ====== 城市输入 autocomplete ====== */
+.city-field { position: relative; }
+.city-suggest {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  margin-top: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 20;
+  display: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+.city-suggest.show { display: block; }
+.city-suggest-item {
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.city-suggest-item:last-child { border-bottom: none; }
+.city-suggest-item:hover,
+.city-suggest-item.active {
+  background: var(--accent-soft);
+  color: var(--accent-hi);
+}
+.city-suggest-item .coord {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-family: Georgia, serif;
+}
+.city-meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+  font-family: Georgia, "Songti SC", serif;
+}
+
+/* ====== 折叠面板：手动校准 ====== */
+.advanced {
+  margin-top: 4px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.advanced summary {
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+  padding: 4px 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.advanced summary:hover { color: var(--accent); }
+.advanced[open] summary { color: var(--accent); margin-bottom: 10px; }
+.advanced .form, .advanced > * { margin-top: 8px; }
+.advanced label { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; color: var(--text-dim); }
+.advanced input {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+.advanced input:focus { outline: none; border-color: var(--accent); }
 
 .btn-primary {
   margin-top: 6px;

@@ -18,14 +18,103 @@ document.querySelectorAll(".tab").forEach(btn => {
   });
 });
 
-// ====== 常用城市下拉 ======
-document.getElementById("s-city").addEventListener("change", (e) => {
-  if (!e.target.value) return;
-  const [lat, lon, tz] = e.target.value.split(",");
-  document.getElementById("s-lat").value = lat;
-  document.getElementById("s-lon").value = lon;
-  document.getElementById("s-tz").value = tz;
-});
+// ====== 城市 autocomplete ======
+// prefix: "s" / "a" / "b"；showCoord: 是否在 meta 里显示经纬度
+function bindCityAutocomplete(prefix, showCoord = false) {
+  const input = document.getElementById(prefix + "-city");
+  const box = document.getElementById(prefix + "-city-suggest");
+  const meta = document.getElementById(prefix + "-city-meta");
+  const latEl = document.getElementById(prefix + "-lat");
+  const lonEl = document.getElementById(prefix + "-lon");
+  const tzEl = document.getElementById(prefix + "-tz");
+  if (!input || !box) return;
+
+  let activeIdx = -1;
+  let currentList = [];
+
+  function applyCity(c) {
+    latEl.value = c[1];
+    lonEl.value = c[2];
+    tzEl.value = c[3];
+    input.value = c[0];
+    const tzStr = (c[3] >= 0 ? "+" : "") + c[3];
+    meta.textContent = showCoord
+      ? `${c[0]} · ${c[1].toFixed(2)}°${c[1]>=0?"N":"S"}, ${Math.abs(c[2]).toFixed(2)}°${c[2]>=0?"E":"W"} · UTC${tzStr}`
+      : `${c[0]} · UTC${tzStr}`;
+    box.classList.remove("show");
+    activeIdx = -1;
+  }
+
+  function render(list) {
+    currentList = list;
+    if (list.length === 0) { box.classList.remove("show"); return; }
+    box.innerHTML = list.map((c, i) => {
+      const tzStr = (c[3] >= 0 ? "+" : "") + c[3];
+      return `<div class="city-suggest-item${i === activeIdx ? " active" : ""}" data-idx="${i}">
+        <span>${c[0]}</span>
+        <span class="coord">UTC${tzStr}</span>
+      </div>`;
+    }).join("");
+    box.classList.add("show");
+    box.querySelectorAll(".city-suggest-item").forEach(el => {
+      el.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        applyCity(currentList[+el.dataset.idx]);
+      });
+    });
+  }
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim();
+    if (!q) { box.classList.remove("show"); return; }
+    render(searchCities(q, 8));
+  });
+
+  input.addEventListener("focus", () => {
+    if (input.value.trim()) render(searchCities(input.value.trim(), 8));
+  });
+
+  input.addEventListener("blur", () => {
+    setTimeout(() => {
+      box.classList.remove("show");
+      const c = findCity(input.value);
+      if (c) applyCity(c);
+    }, 150);
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (!box.classList.contains("show")) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, currentList.length - 1);
+      render(currentList);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      render(currentList);
+    } else if (e.key === "Enter") {
+      if (activeIdx >= 0) {
+        e.preventDefault();
+        applyCity(currentList[activeIdx]);
+      }
+    } else if (e.key === "Escape") {
+      box.classList.remove("show");
+    }
+  });
+
+  // 手动修改高级经纬度时，清空 meta 提示
+  [latEl, lonEl, tzEl].forEach(el => {
+    if (el && el.type !== "hidden") {
+      el.addEventListener("input", () => {
+        meta.textContent = `自定义 · ${latEl.value}°, ${lonEl.value}° · UTC${tzEl.value}`;
+      });
+    }
+  });
+}
+
+bindCityAutocomplete("s", true);
+bindCityAutocomplete("a", false);
+bindCityAutocomplete("b", false);
 
 // ====== 本命盘表单 ======
 document.getElementById("form-single").addEventListener("submit", (e) => {
