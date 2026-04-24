@@ -43,6 +43,10 @@ function bindCityAutocomplete(prefix, showCoord = false) {
       : `${c[0]} · UTC${tzStr}`;
     box.classList.remove("show");
     activeIdx = -1;
+    // 触发实时排盘（本命盘 prefix=s 时）
+    if (prefix === "s") {
+      document.getElementById("form-single").dispatchEvent(new Event("submit"));
+    }
   }
 
   function render(list) {
@@ -149,6 +153,28 @@ document.getElementById("form-single").addEventListener("submit", (e) => {
 
   renderSingle(currentChart);
 });
+
+// ====== 实时排盘：任何输入变化 → 自动重新计算 ======
+(function bindLiveUpdate() {
+  const form = document.getElementById("form-single");
+  const trigger = () => form.dispatchEvent(new Event("submit"));
+  ["s-date","s-time-start","s-time-end","s-name"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", trigger);
+  });
+  // 城市输入：失焦或从下拉选中后触发
+  const cityInput = document.getElementById("s-city");
+  if (cityInput) {
+    cityInput.addEventListener("change", trigger);
+    cityInput.addEventListener("blur", () => setTimeout(trigger, 200));
+  }
+  // 监听 hidden 经纬度字段（autocomplete 写入后会变）
+  // 用 MutationObserver 不方便，改用自定义事件
+  ["s-lat","s-lon","s-tz"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", trigger);
+  });
+})();
 
 // 根据城市输入框的值，强制写入经纬度/时区/meta
 function syncCityToCoord(prefix) {
